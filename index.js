@@ -70,6 +70,19 @@ async function run() {
       res.send(result);
     });
 
+    app.get('/food/:id',async(req,res)=>{
+      const id = req.params.id;
+      const query = {_id: new ObjectId(id)};
+      const result = await foodCollection.findOne(query).toArray()
+      res.send(result)
+    })
+
+    app.get("/Available-Foods", async (req, res) => {
+      const query = {Status:'available'}
+      const result = await foodCollection.find(query).toArray()
+      res.send(result)
+    });
+
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
     );
