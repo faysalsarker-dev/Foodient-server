@@ -11,19 +11,9 @@ const port = process.env.PORT || 5000;
 //
 
 // midleware
-
-// app.use(
-//   cors({
-//     origin: ["http://localhost:5173/", "http://localhost:5173/"],
-//     credentials: true,
-//   })
-// );
-// app.use(express.json());
-// app.use(cookieParser());
-
 app.use(
   cors({
-    origin: ["http://localhost:5173","https://server-teal-phi.vercel.app"],
+    origin: ["http://localhost:5173", "https://foodient-ca6e1.web.app"],
     credentials: true,
   })
 );
@@ -41,14 +31,15 @@ const client = new MongoClient(uri, {
   },
 });
 
-const veryfyToken = (req, res, next) => {
+const verifyToken = (req, res, next) => {
   const token = req?.cookies?.token;
+
   if (!token) {
-    return req.status(401).send({ Message: "unauthoraize acces " });
+    return res.status(401).send({ message: "unauthorized access" });
   }
-  jwt.verify(token, process.env.SECRET_SERVER, (err, decoded) => {
+  jwt.verify(token, process.env.DB_SECRET, (err, decoded) => {
     if (err) {
-      return res.status(401).send({ message: "unauthoraize acces" });
+      return res.status(401).send({ message: "unauthorized access" });
     }
     req.user = decoded;
     next();
@@ -73,9 +64,7 @@ async function run() {
 
     app.post("/logout", async (req, res) => {
       const user = req.body;
-      res
-        .clearCookie("token", { ...cookieOptions, maxAge: 0 })
-        .send({ success: true });
+      res.clearCookie("token", { maxAge: 0 }).send({ success: true });
     });
     app.post("/addfood", async (req, res) => {
       const data = req.body;
@@ -96,10 +85,43 @@ async function run() {
       res.send(result);
     });
 
-    app.get("/manage-my-foods/:email", async (req, res) => {
+    app.get("/my-req-foods/:email", verifyToken, async (req, res) => {
+      console.log(req.user);
       const email = req.params.email;
+      if(req.user.email!==email) return res.status(401).send({message: 'unauthorized access'})
+      const query = { requestor_email: email };
+      const result = await foodCollection.find(query).toArray();
+      res.send(result);
+    });
+
+    app.get("/manage-my-foods/:email",verifyToken, async (req, res) => {
+      console.log(req.user);
+      const email = req.params.email;
+      if(req.user.email!==email) return res.status(401).send({message: 'unauthorized access'})
       const query = { Doner_email: email };
       const result = await foodCollection.find(query).toArray();
+      res.send(result);
+    });
+
+    app.delete("/delete-food/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await foodCollection.deleteOne(query);
+      res.send(result);
+    });
+
+    app.patch("/update/:id", async (req, res) => {
+      const id = req.params.id;
+      const data = req.body;
+      const query = { _id: new ObjectId(id) };
+      const options = { upsert: true };
+      const info = {
+        $set: {
+          ...data,
+        },
+      };
+
+      const result = await foodCollection.updateOne(query, info, options);
       res.send(result);
     });
 
@@ -127,6 +149,32 @@ async function run() {
       const result = await foodCollection.updateOne(query, info, options);
       res.send(result);
     });
+
+
+
+
+
+
+
+
+
+
+
+    app.get('/featured-food',async(req,res)=>{
+      const query = {Status:'available'}
+      const option = { sort: { FoodQuantity:  -1  } };
+      const result = await foodCollection.find(query,option).limit(6).toArray()
+      res.send(result);
+    })
+
+
+
+
+
+
+
+
+
 
     app.get("/Available-Foods", async (req, res) => {
       const search = req.query.search;
