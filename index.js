@@ -66,10 +66,19 @@ async function run() {
         .send({ success: true });
     });
 
+   
     app.post("/logout", async (req, res) => {
       const user = req.body;
       res.clearCookie("token", { maxAge: 0 }).send({ success: true });
     });
+
+
+
+
+
+
+
+
     app.post("/addfood", async (req, res) => {
       const data = req.body;
       console.log(data);
