@@ -1,5 +1,4 @@
 const express = require("express");
-
 const cors = require("cors");
 const jwt = require("jsonwebtoken");
 const cookieParser = require("cookie-parser");
@@ -168,6 +167,12 @@ async function run() {
       const query = {Status:'available'}
       const option = { sort: { FoodQuantity:  -1  } };
       const result = await foodCollection.find(query,option).limit(6).toArray()
+      res.send(result);
+    })
+
+    app.get('/leatest',async(req,res)=>{
+      const query = { Status: 'available' };
+      const result = await foodCollection.find(query).sort({ _id: -1 }).limit(6).toArray();
       res.send(result);
     })
 
