@@ -52,6 +52,8 @@ async function run() {
   try {
     const foodCollection = client.db("food_collection").collection("food");
 
+   
+
     app.post("/jwt", (req, res) => {
       const user = req.body;
       const token = jwt.sign(user, process.env.DB_SECRET);
