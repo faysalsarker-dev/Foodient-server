@@ -164,29 +164,12 @@ async function run() {
     });
 
 
-
-
-
-
-
-
-
-
-
     app.get('/featured-food',async(req,res)=>{
       const query = {Status:'available'}
       const option = { sort: { FoodQuantity:  -1  } };
       const result = await foodCollection.find(query,option).limit(6).toArray()
       res.send(result);
     })
-
-
-
-
-
-
-
-
 
 
     app.get("/Available-Foods", async (req, res) => {
@@ -217,7 +200,7 @@ async function run() {
 run().catch(console.dir);
 
 app.get("/", (req, res) => {
-  res.send("sercer is running");
+  res.send("server is running");
 });
 app.listen(port, () => {
   console.log(`server is running on ${port}`);
